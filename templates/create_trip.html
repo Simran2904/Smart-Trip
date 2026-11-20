@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 mb-5">
+    <div class="card shadow p-4">
+
+        <h2 class="mb-2">Plan Your SmartTrip</h2>
+        <p class="text-muted">Enter your travel details below.</p>
+
+        <form method="POST" action="{{ url_for('create_trip') }}">
+
+            <div class="mb-3">
+                <label class="form-label">Starting City</label>
+                <input type="text" name="starting_city"
+                       class="form-control"
+                       placeholder="Example: Pune" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Destination</label>
+
+                <select name="destination_id" id="destination_id"
+                        class="form-select" required>
+
+                    <option value="">Select Destination</option>
+
+                    {% for destination in destinations %}
+                    <option value="{{ destination.destination_id }}">
+                        {{ destination.name }}, {{ destination.state }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Departure Date</label>
+                    <input type="date" name="departure_date"
+                           id="departure_date"
+                           class="form-control" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Return Date</label>
+                    <input type="date" name="return_date"
+                           id="return_date"
+                           class="form-control" required>
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Number of Travellers</label>
+                <input type="number" name="travellers"
+                       id="travellers"
+                       class="form-control"
+                       min="1" value="2" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Transport Mode</label>
+
+                <select name="transport_mode"
+                        class="form-select" required>
+
+                    <option value="">Select Transport</option>
+                    <option value="Bus">Bus</option>
+                    <option value="Train">Train</option>
+                    <option value="Flight">Flight</option>
+
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Hotel</label>
+
+                <select name="hotel_name" id="hotel_name"
+                        class="form-select" required>
+
+                    <option value="">Select a destination first</option>
+
+                </select>
+
+                <small class="text-muted">
+                    Select a destination to view its hotels and prices.
+                </small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Number of Rooms</label>
+                <input type="number" name="hotel_rooms"
+                       class="form-control"
+                       min="1" value="1" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Estimated Miscellaneous Expenses (₹)
+                </label>
+
+                <input type="number" name="miscellaneous_cost"
+                       id="miscellaneous_cost"
+                       class="form-control"
+                       value="0" readonly>
+
+                <small class="text-muted">
+                    Automatically calculated at ₹200 per traveller per night.
+                </small>
+            </div>
+
+          <button type="submit"
+        class="btn btn-primary">
+    Save Trip
+</button>
+
+<a href="{{ url_for('dashboard') }}"
+   class="btn btn-secondary">
+    Cancel
+</a>
+        </form>
+
+    </div>
+</div>
+
+
+<!-- Destination data from MongoDB -->
+<script type="application/json" id="destination-data">
+{{ destinations | tojson }}
+</script>
+
+
+<script>
+
+// Read destination information
+const destinationDataElement =
+    document.getElementById("destination-data");
+
+const destinations =
+    JSON.parse(destinationDataElement.textContent);
+
+
+// Get form elements
+const destinationSelect =
+    document.getElementById("destination_id");
+
+const hotelSelect =
+    document.getElementById("hotel_name");
+
+const travellersInput =
+    document.getElementById("travellers");
+
+const departureInput =
+    document.getElementById("departure_date");
+
+const returnInput =
+    document.getElementById("return_date");
+
+const miscellaneousInput =
+    document.getElementById("miscellaneous_cost");
+
+
+// Load hotels when destination is selected
+destinationSelect.addEventListener("change", function () {
+
+    const selectedId = this.value;
+
+    hotelSelect.innerHTML =
+        '<option value="">Select Hotel</option>';
+
+    const selectedDestination = destinations.find(
+        function (destination) {
+            return String(destination.destination_id) ===
+                   String(selectedId);
+        }
+    );
+
+    if (selectedDestination &&
+        Array.isArray(selectedDestination.hotels)) {
+
+        selectedDestination.hotels.forEach(function (hotel) {
+
+            const option = document.createElement("option");
+
+            option.value = hotel.name;
+
+            option.textContent =
+                hotel.name +
+                " - ₹" +
+                hotel.price_per_room +
+                " per room/night";
+
+            hotelSelect.appendChild(option);
+
+        });
+
+    } else {
+
+        hotelSelect.innerHTML =
+            '<option value="">No hotels available</option>';
+
+    }
+
+});
+
+
+// Calculate miscellaneous expenses
+function calculateMiscellaneous() {
+
+    const travellers =
+        Number(travellersInput.value) || 0;
+
+    const departure = departureInput.value;
+    const returning = returnInput.value;
+
+    let nights = 0;
+
+    if (departure && returning) {
+
+        const startDate =
+            new Date(departure + "T00:00:00");
+
+        const endDate =
+            new Date(returning + "T00:00:00");
+
+        nights = Math.round(
+            (endDate - startDate) / 86400000
+        );
+
+    }
+
+    if (travellers > 0 && nights > 0) {
+
+        miscellaneousInput.value =
+            200 * travellers * nights;
+
+    } else {
+
+        miscellaneousInput.value = 0;
+
+    }
+
+}
+
+
+// Recalculate when values change
+travellersInput.addEventListener(
+    "input", calculateMiscellaneous
+);
+
+departureInput.addEventListener(
+    "change", calculateMiscellaneous
+);
+
+returnInput.addEventListener(
+    "change", calculateMiscellaneous
+);
+
+
+// Prevent return date from being before departure
+departureInput.addEventListener("change", function () {
+
+    returnInput.min = this.value;
+
+    if (returnInput.value &&
+        returnInput.value <= this.value) {
+
+        returnInput.value = "";
+
+    }
+
+    calculateMiscellaneous();
+
+});
+
+</script>
+
+{% endblock %}

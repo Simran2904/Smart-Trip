@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 mb-5">
+
+    <div class="card shadow-sm p-4">
+
+        <h2>My Trip History</h2>
+        <p class="text-muted">
+            View all your previously planned trips.
+        </p>
+
+        <hr>
+
+        {% if trips %}
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-primary">
+                    <tr>
+                        <th>Trip ID</th>
+                        <th>Destination</th>
+                        <th>Starting City</th>
+                        <th>Departure</th>
+                        <th>Return</th>
+                        <th>Travellers</th>
+                        <th>Total Cost</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for trip in trips %}
+                    <tr>
+                        <td>{{ trip.trip_id }}</td>
+                        <td>{{ trip.destination_name }}</td>
+                        <td>{{ trip.starting_city }}</td>
+                        <td>{{ trip.departure_date }}</td>
+                        <td>{{ trip.return_date }}</td>
+                        <td>{{ trip.travellers }}</td>
+                        <td>₹{{ trip.total_cost }}</td>
+                        <td>{{ trip.trip_status }}</td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="alert alert-info">
+            You have not planned any trips yet.
+        </div>
+
+        {% endif %}
+
+        <a href="{{ url_for('dashboard') }}"
+           class="btn btn-secondary mt-3">
+            Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

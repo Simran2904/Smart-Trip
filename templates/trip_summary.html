@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 mb-5">
+    <div class="card shadow p-4">
+
+        <h2 class="mb-2">Your Trip Summary</h2>
+        <p class="text-muted">
+            Here are your trip details and estimated expenses.
+        </p>
+
+        <hr>
+
+        <h4>Trip Details</h4>
+
+        <p><strong>Destination:</strong> {{ trip.destination_name }}</p>
+        <p><strong>Starting City:</strong> {{ trip.starting_city }}</p>
+        <p><strong>Departure:</strong> {{ trip.departure_date }}</p>
+        <p><strong>Return:</strong> {{ trip.return_date }}</p>
+        <p><strong>Travellers:</strong> {{ trip.travellers }}</p>
+        <p><strong>Transport:</strong> {{ trip.transport_mode }}</p>
+        <p><strong>Hotel:</strong> {{ trip.hotel_name }}</p>
+        <p><strong>Rooms:</strong> {{ trip.hotel_rooms }}</p>
+        <p><strong>Nights:</strong> {{ trip.hotel_nights }}</p>
+
+        <hr>
+
+        <h4>Estimated Cost Breakdown</h4>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Expense</th>
+                    <th>Estimated Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.category }}</td>
+                    <td>₹{{ "%.2f"|format(expense.amount) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <th>Total Estimated Cost</th>
+                    <th>₹{{ "%.2f"|format(trip.total_cost) }}</th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="mt-3">
+           <a href="{{ url_for('payment', trip_id=trip.trip_id) }}"
+   class="btn btn-success">
+    Proceed to Payment
+</a>
+
+<a href="{{ url_for('dashboard') }}"
+   class="btn btn-secondary">
+    Back to Dashboard
+</a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

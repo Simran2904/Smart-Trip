@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+
+    <div class="card shadow p-4 mx-auto"
+         style="max-width: 600px;">
+
+        <h2 class="text-center">SmartTrip Payment</h2>
+
+        <p class="text-center text-muted">
+            Complete your simulated payment.
+        </p>
+
+        <hr>
+
+        <h5>Payment Details</h5>
+
+        <p>
+            <strong>Destination:</strong>
+            {{ trip.destination_name }}
+        </p>
+
+        <h4 class="text-center text-success mt-3 mb-4">
+            Amount: ₹{{ "%.2f"|format(trip.total_cost) }}
+        </h4>
+
+        <form method="POST"
+              action="{{ url_for('payment', trip_id=trip.trip_id) }}">
+
+            <label class="form-label">
+                Select Payment Method
+            </label>
+
+            <select name="payment_method"
+                    class="form-select mb-4"
+                    required>
+
+                <option value="">Choose Payment Method</option>
+                <option value="UPI">UPI</option>
+                <option value="Card">Debit / Credit Card</option>
+                <option value="Net Banking">Net Banking</option>
+
+            </select>
+
+            <button type="submit"
+                    class="btn btn-success w-100">
+                Confirm Simulated Payment
+            </button>
+
+            <a href="{{ url_for('dashboard') }}"
+               class="btn btn-secondary w-100 mt-2">
+                Cancel
+            </a>
+
+        </form>
+
+        <small class="text-muted text-center mt-3">
+            This is a demonstration payment.
+            No real money will be deducted.
+        </small>
+
+    </div>
+
+</div>
+
+{% endblock %}
